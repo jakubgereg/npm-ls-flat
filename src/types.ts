@@ -1,0 +1,21 @@
+export type DependecyList = Record<string, string>;
+
+export interface PackageJsonType {
+  dependencies?: DependecyList;
+  devDependencies?: DependecyList;
+}
+
+export type DependencyTree = Record<string, PackageType>;
+
+export interface PackageType {
+  version: string;
+  invalid?: string;
+  dependencies?: DependencyTree;
+}
+
+export interface PackageInfo {
+  name: string;
+  version: string;
+  invalid?: string;
+  path?: string[];
+}
