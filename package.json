@@ -1,6 +1,6 @@
 {
   "name": "npm-ls-flat",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "detects dependency version mismatches for streamlined dependency management",
   "main": "dist/index.js",
