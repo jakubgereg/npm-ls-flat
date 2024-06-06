@@ -8,6 +8,9 @@
   "files": [
     "dist/**/**.*"
   ],
+  "bin": {
+    "npm-ls-flat": "dist/index.js"
+  },
   "scripts": {
     "format": "prettier --ignore-path .gitignore --write '**/*.{ts,tsx,js,html}'",
     "format:check": "prettier --check '**/*.{ts,tsx,js,html}'",
