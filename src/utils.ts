@@ -1,6 +1,8 @@
 import semver from 'semver';
 import type { DependencyTree, PackageInfo, PackageType } from './types';
 
+type SortOrder = 'ASC' | 'DESC';
+
 export const isPackageType = (obj: any): obj is PackageType =>
   typeof obj === 'object' && typeof obj.version === 'string' && semver.valid(obj.version) !== null;
 
@@ -32,3 +34,6 @@ export const traverseDependencyTree = (dependencyTree: DependencyTree): PackageI
   }
   return result;
 };
+
+export const sortPackageVersions = (pckg: PackageInfo[], order: SortOrder = 'ASC'): PackageInfo[] =>
+  pckg.sort((a, b) => (order === 'ASC' ? semver.compare(a.version, b.version) : semver.rcompare(a.version, b.version)));

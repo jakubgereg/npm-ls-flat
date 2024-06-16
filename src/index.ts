@@ -5,9 +5,10 @@ import path from 'node:path';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import lodash from 'lodash';
+import semver from 'semver';
 
 import type { DependecyList, DependencyTree, PackageInfo, PackageJsonType, PackageType } from './types.js';
-import { traverseDependencyTree } from './utils.js';
+import { sortPackageVersions, traverseDependencyTree } from './utils.js';
 
 const readPackageJsonFile = async (path: string, allowDev = false): Promise<DependecyList> => {
   try {
@@ -74,12 +75,15 @@ const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<str
 
     for (const [root, pckgs] of mismatches) {
       console.log(
-        `\n${root.name} ${chalk.greenBright(root.version)} ${root.invalid ? chalk.redBright('(invalid)') : ''}`
+        `\n${root.name} ${chalk.cyanBright(root.version)} ${root.invalid ? chalk.redBright('(invalid)') : ''}`
       );
       if (root.invalid) console.log(` ${chalk.redBright(root.invalid)}`);
 
-      for (const pckg of pckgs) {
-        console.log(` ${chalk.redBright(pckg.version)} (${chalk.yellow(pckg.path?.join(' > '))})`);
+      const sortedPackages = sortPackageVersions(pckgs, 'DESC');
+      const packageVersionColor = (version: string) =>
+        semver.gt(root.version, version) ? chalk.redBright(version) : chalk.greenBright(version);
+      for (const pckg of sortedPackages) {
+        console.log(` ${packageVersionColor(pckg.version)} (${chalk.yellow(pckg.path?.join(' > '))})`);
       }
     }
   } catch (err) {
