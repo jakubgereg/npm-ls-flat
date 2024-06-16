@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
+import { exec } from 'node:child_process';
+import path from 'node:path';
 import chalk from 'chalk';
-import { exec } from 'child_process';
 import fs from 'fs-extra';
 import lodash from 'lodash';
-import path from 'path';
 
-import { DependecyList, DependencyTree, PackageInfo, PackageJsonType, PackageType } from './types.js';
+import type { DependecyList, DependencyTree, PackageInfo, PackageJsonType, PackageType } from './types.js';
 import { traverseDependencyTree } from './utils.js';
 
-const readPackageJsonFile = async (path: string, allowDev: boolean = false): Promise<DependecyList> => {
+const readPackageJsonFile = async (path: string, allowDev = false): Promise<DependecyList> => {
   try {
     const { dependencies, devDependencies }: PackageJsonType = await fs.readJson(path);
     let allPackages = { ...dependencies };
@@ -67,21 +67,21 @@ const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<str
       //sort first packages that have invalid versions
       .sort((a, b) => (a[0].invalid ? -1 : 1));
 
-    mismatches;
-
     if (!mismatches.length) {
       console.log(chalk.green('All packages have consistent versions.'));
       return;
     }
-    mismatches.forEach(([root, mismatches]) => {
+
+    for (const [root, pckgs] of mismatches) {
       console.log(
         `\n${root.name} ${chalk.greenBright(root.version)} ${root.invalid ? chalk.redBright('(invalid)') : ''}`
       );
       if (root.invalid) console.log(` ${chalk.redBright(root.invalid)}`);
-      mismatches.forEach((mismatch) => {
-        console.log(` ${chalk.redBright(mismatch.version)} (${chalk.yellow(mismatch.path?.join(' > '))})`);
-      });
-    });
+
+      for (const pckg of pckgs) {
+        console.log(` ${chalk.redBright(pckg.version)} (${chalk.yellow(pckg.path?.join(' > '))})`);
+      }
+    }
   } catch (err) {
     console.error('Failed to get packages:', err);
   }

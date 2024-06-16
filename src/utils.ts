@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { DependencyTree, PackageInfo, PackageType } from './types';
+import type { DependencyTree, PackageInfo, PackageType } from './types';
 
 export const isPackageType = (obj: any): obj is PackageType =>
   typeof obj === 'object' && typeof obj.version === 'string' && semver.valid(obj.version) !== null;
@@ -18,17 +18,17 @@ const transformToPackageInfo = (pkg: PackageType, path: string[] = []): PackageI
     });
   }
   if (hasDependencies(pkg)) {
-    Object.entries(pkg.dependencies).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(pkg.dependencies)) {
       result.push(...transformToPackageInfo(value, [...path, key]));
-    });
+    }
   }
   return result;
 };
 
 export const traverseDependencyTree = (dependencyTree: DependencyTree): PackageInfo[] => {
   const result: PackageInfo[] = [];
-  Object.entries(dependencyTree).forEach(([name, pkg]) => {
+  for (const [name, pkg] of Object.entries(dependencyTree)) {
     result.push(...transformToPackageInfo(pkg, [name]));
-  });
+  }
   return result;
 };
