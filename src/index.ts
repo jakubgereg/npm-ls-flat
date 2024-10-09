@@ -36,17 +36,20 @@ const getDependencyTree = (packages: string[] = []): Promise<DependencyTree | un
   });
 
 const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<string, [PackageInfo, PackageInfo[]]> =>
-  Object.entries(deps).reduce((acc, [name, dependencies]) => {
-    const root = dependencies.find((dependency) => !dependency.path);
-    if (!root) return acc;
-    const differentVersions = dependencies.filter((dependency) => dependency.version !== root.version);
-    const versions: [PackageInfo, PackageInfo[]] | [] = differentVersions.length
-      ? [root, dependencies.filter((dependency) => dependency.version !== root.version)]
-      : [root, []];
+  Object.entries(deps).reduce(
+    (acc, [name, dependencies]) => {
+      const root = dependencies.find((dependency) => !dependency.path);
+      if (!root) return acc;
+      const differentVersions = dependencies.filter((dependency) => dependency.version !== root.version);
+      const versions: [PackageInfo, PackageInfo[]] | [] = differentVersions.length
+        ? [root, dependencies.filter((dependency) => dependency.version !== root.version)]
+        : [root, []];
 
-    if (versions[1].length > 0 || root.invalid) acc[name] = versions;
-    return acc;
-  }, {} as Record<string, [PackageInfo, PackageInfo[]]>);
+      if (versions[1].length > 0 || root.invalid) acc[name] = versions;
+      return acc;
+    },
+    {} as Record<string, [PackageInfo, PackageInfo[]]>
+  );
 
 (async () => {
   const packageJsonPath = path.resolve(process.cwd(), 'package.json');
