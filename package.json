@@ -5,9 +5,7 @@
   "description": "detects dependency version mismatches for streamlined dependency management",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist/**/**.*"
-  ],
+  "files": ["dist/**/**.*"],
   "bin": {
     "npm-ls-flat": "dist/index.js"
   },

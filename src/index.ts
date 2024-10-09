@@ -36,26 +36,27 @@ const getDependencyTree = (packages: string[] = []): Promise<DependencyTree | un
   });
 
 const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<string, [PackageInfo, PackageInfo[]]> =>
-  Object.entries(deps).reduce(
-    (acc, [name, dependencies]) => {
-      const root = dependencies.find((dependency) => !dependency.path);
-      if (!root) return acc;
-      const differentVersions = dependencies.filter((dependency) => dependency.version !== root.version);
-      const versions: [PackageInfo, PackageInfo[]] | [] = differentVersions.length
-        ? [root, dependencies.filter((dependency) => dependency.version !== root.version)]
-        : [root, []];
+  Object.entries(deps).reduce((acc, [name, dependencies]) => {
+    const root = dependencies.find((dependency) => !dependency.path);
+    if (!root) return acc;
+    const differentVersions = dependencies.filter((dependency) => dependency.version !== root.version);
+    const versions: [PackageInfo, PackageInfo[]] | [] = differentVersions.length
+      ? [root, dependencies.filter((dependency) => dependency.version !== root.version)]
+      : [root, []];
 
-      if (versions[1].length > 0 || root.invalid) acc[name] = versions;
-      return acc;
-    },
-    {} as Record<string, [PackageInfo, PackageInfo[]]>
-  );
+    if (versions[1].length > 0 || root.invalid) acc[name] = versions;
+    return acc;
+  }, {} as Record<string, [PackageInfo, PackageInfo[]]>);
 
 (async () => {
   const packageJsonPath = path.resolve(process.cwd(), 'package.json');
   try {
     const packageNames = Object.keys(await readPackageJsonFile(packageJsonPath, true));
-    console.log(`Checking ${packageNames.length} ${packageNames.length > 1 ? 'packages' : 'package'}...`);
+    console.log(
+      `Looking for missmatches in ${chalk.greenBright(packageNames.length)} ${
+        packageNames.length > 1 ? 'packages' : 'package'
+      }...`
+    );
     const dependencyTree = await getDependencyTree(packageNames);
     const groupedDependencyTree = lodash.groupBy(
       traverseDependencyTree(dependencyTree ?? {}).filter((dependency) =>
@@ -66,7 +67,7 @@ const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<str
 
     const mismatches = Object.values(findMismatchedVersions(groupedDependencyTree))
       //sort first packages that have invalid versions
-      .sort((a, b) => (a[0].invalid ? -1 : 1));
+      .sort((a) => (a[0].invalid ? -1 : 1));
 
     if (!mismatches.length) {
       console.log(chalk.green('All packages have consistent versions.'));
@@ -80,10 +81,13 @@ const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<str
       if (root.invalid) console.log(` ${chalk.redBright(root.invalid)}`);
 
       const sortedPackages = sortPackageVersions(pckgs, 'DESC');
+
       const packageVersionColor = (version: string) =>
         semver.gt(root.version, version) ? chalk.redBright(version) : chalk.greenBright(version);
       for (const pckg of sortedPackages) {
-        console.log(` ${packageVersionColor(pckg.version)} (${chalk.yellow(pckg.path?.join(' > '))})`);
+        console.log(
+          ` ${packageVersionColor(pckg.version)} (${chalk.yellow(pckg.path?.map(({ name }) => name)?.join(' > '))})`
+        );
       }
     }
   } catch (err) {

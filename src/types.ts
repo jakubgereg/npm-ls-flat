@@ -13,9 +13,14 @@ export interface PackageType {
   dependencies?: DependencyTree;
 }
 
-export interface PackageInfo {
+export interface PackageBaseInfo {
+  name: string;
+  version: string;
+}
+
+export interface PackageInfo extends PackageBaseInfo {
   name: string;
   version: string;
   invalid?: string;
-  path?: string[];
+  path?: PackageBaseInfo[];
 }

@@ -2,39 +2,39 @@ import { DependencyTree } from '../src/types';
 import { hasDependencies, isPackageType, traverseDependencyTree } from '../src/utils';
 
 const dependencyTree: DependencyTree = {
-  a: {
+  'package-a': {
     version: '1.0.0',
     dependencies: {
-      b: {
+      'package-b': {
         version: '1.1.0',
         dependencies: {
-          c: {
+          'package-c': {
             version: '1.2.0'
           }
         }
       }
     }
   },
-  x: {
+  'package-x': {
     version: '2.0.0',
     dependencies: {
-      y: {
+      'package-y': {
         version: '3.0.0',
         dependencies: {
-          z: {
+          'package-z': {
             version: '4.0.0'
           }
         }
       }
     }
   },
-  c: {
+  'package-c': {
     version: '1.2.0'
   },
-  d: {
+  'package-d': {
     version: '1.3.0',
     dependencies: {
-      a: {
+      'package-a': {
         version: '1.0.1'
       }
     }
@@ -42,23 +42,23 @@ const dependencyTree: DependencyTree = {
 };
 
 const brokenDependencyTree: any = {
-  a: {
-    version: 'invalid-version'
+  'package-a': {
+    version: '_invalid_version_'
   },
-  b: {
+  'package-b': {
     version: '1.1.0',
-    dependencies: ['1', '2', '3']
+    dependencies: ['package-1', 'package-2', 'package-3']
   },
-  c: {
+  'package-c': {
     version: '1.2.0',
     dependencies: {
-      d: {
-        version: 'xy'
+      'package-d': {
+        version: '_invalid_version_2'
       },
-      e: {
+      'package-e': {
         version: 0
       },
-      correct: {
+      'package-f': {
         version: '1.0.122'
       }
     }
@@ -72,26 +72,44 @@ describe('traverseDependencyTree', () => {
   it('should traverse dependency tree', () => {
     const result = traverseDependencyTree(dependencyTree);
     expect(result).toEqual([
-      { name: 'a', version: '1.0.0', path: undefined },
-      { name: 'b', version: '1.1.0', path: ['a'] },
-      { name: 'c', version: '1.2.0', path: ['a', 'b'] },
-      { name: 'x', version: '2.0.0', path: undefined },
-      { name: 'y', version: '3.0.0', path: ['x'] },
-      { name: 'z', version: '4.0.0', path: ['x', 'y'] },
-      { name: 'c', version: '1.2.0', path: undefined },
-      { name: 'd', version: '1.3.0', path: undefined },
-      { name: 'a', version: '1.0.1', path: ['d'] }
+      { name: 'package-a', version: '1.0.0', path: undefined },
+      { name: 'package-b', version: '1.1.0', path: [{ name: 'package-a', version: '1.0.0' }] },
+      {
+        name: 'package-c',
+        version: '1.2.0',
+        path: [
+          { name: 'package-a', version: '1.0.0' },
+          { name: 'package-b', version: '1.1.0' }
+        ]
+      },
+      { name: 'package-x', version: '2.0.0', path: undefined },
+      { name: 'package-y', version: '3.0.0', path: [{ name: 'package-x', version: '2.0.0' }] },
+      {
+        name: 'package-z',
+        version: '4.0.0',
+        path: [
+          { name: 'package-x', version: '2.0.0' },
+          { name: 'package-y', version: '3.0.0' }
+        ]
+      },
+      { name: 'package-c', version: '1.2.0', path: undefined },
+      { name: 'package-d', version: '1.3.0', path: undefined },
+      { name: 'package-a', version: '1.0.1', path: [{ name: 'package-d', version: '1.3.0' }] }
     ]);
+    expect(traverseDependencyTree(dependencyTree)).toMatchSnapshot();
   });
 
   it('should handle broken dependency tree', () => {
     const result = traverseDependencyTree(brokenDependencyTree);
     expect(result).toEqual([
-      { name: 'b', version: '1.1.0', path: undefined },
-      { name: 'c', version: '1.2.0', path: undefined },
-      { name: 'correct', version: '1.0.122', path: ['c'] }
+      { name: 'package-b', version: '1.1.0', path: undefined },
+      { name: 'package-c', version: '1.2.0', path: undefined },
+      { name: 'package-f', version: '1.0.122', path: [{ name: 'package-c', version: '1.2.0' }] }
     ]);
+    expect(traverseDependencyTree(brokenDependencyTree)).toMatchSnapshot();
   });
+
+  it('should match snapshot', () => {});
 });
 
 describe('isPackageType', () => {
@@ -102,7 +120,7 @@ describe('isPackageType', () => {
     expect(isPackageType({ name: 'my package' })).toBe(false);
     expect(isPackageType(['1.2.3'])).toBe(false);
     expect(isPackageType({ version: 3 })).toBe(false);
-    expect(isPackageType({ version: 'x' })).toBe(false);
+    expect(isPackageType({ version: '_ivalid_version_' })).toBe(false);
   });
 });
 
