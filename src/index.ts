@@ -24,8 +24,8 @@ const readPackageJsonFile = async (path: string, allowDev = false): Promise<Depe
 
 const getDependencyTree = (packages: string[] = []): Promise<DependencyTree | undefined> =>
   new Promise((resolve, reject) => {
-    const npmls = packages.length ? `npm ls ${packages.join(' ')} --all --json` : 'npm ls --all --json';
-    exec(npmls, (_, stdout) => {
+    const command = packages.length ? `npm ls ${packages.join(' ')} --all --json` : 'npm ls --all --json';
+    exec(command, (_, stdout) => {
       try {
         const { dependencies } = JSON.parse(stdout) as PackageType;
         resolve(dependencies);
@@ -77,19 +77,19 @@ const findMismatchedVersions = (deps: Record<string, PackageInfo[]>): Record<str
       return;
     }
 
-    for (const [root, pckgs] of mismatches) {
+    for (const [root, pkgs] of mismatches) {
       console.log(
         `\n${root.name} ${chalk.cyanBright(root.version)} ${root.invalid ? chalk.redBright('(invalid)') : ''}`
       );
       if (root.invalid) console.log(` ${chalk.redBright(root.invalid)}`);
 
-      const sortedPackages = sortPackageVersions(pckgs, 'DESC');
+      const sortedPackages = sortPackageVersions(pkgs, 'DESC');
 
       const packageVersionColor = (version: string) =>
         semver.gt(root.version, version) ? chalk.redBright(version) : chalk.greenBright(version);
-      for (const pckg of sortedPackages) {
+      for (const pkg of sortedPackages) {
         console.log(
-          ` ${packageVersionColor(pckg.version)} (${chalk.yellow(pckg.path?.map(({ name }) => name)?.join(' > '))})`
+          ` ${packageVersionColor(pkg.version)} (${chalk.yellow(pkg.path?.map(({ name }) => name)?.join(' > '))})`
         );
       }
     }
