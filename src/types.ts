@@ -1,8 +1,8 @@
-export type DependecyList = Record<string, string>;
+export type DependencyList = Record<string, string>;
 
 export interface PackageJsonType {
-  dependencies?: DependecyList;
-  devDependencies?: DependecyList;
+  dependencies?: DependencyList;
+  devDependencies?: DependencyList;
 }
 
 export type DependencyTree = Record<string, PackageType>;
