@@ -35,5 +35,5 @@ export const traverseDependencyTree = (dependencyTree: DependencyTree): PackageI
   return result;
 };
 
-export const sortPackageVersions = (pckg: PackageInfo[], order: SortOrder = 'ASC'): PackageInfo[] =>
-  pckg.sort((a, b) => (order === 'ASC' ? semver.compare(a.version, b.version) : semver.rcompare(a.version, b.version)));
+export const sortPackageVersions = (pkg: PackageInfo[], order: SortOrder = 'ASC'): PackageInfo[] =>
+  pkg.sort((a, b) => (order === 'ASC' ? semver.compare(a.version, b.version) : semver.rcompare(a.version, b.version)));
